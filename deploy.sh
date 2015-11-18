@@ -42,7 +42,7 @@ then
 	version=$default_version
 fi
 
-read -p "> Server name [‹┘ '$default_server']: " servername
+read -p "> Server name [‹┘ '$default_server'; all]: " servername
 if [ "$servername" = "" ]; then
 	servername="$default_server"
 	server=" -s $default_server"
@@ -59,15 +59,19 @@ else
 	roll=" --rollback=\"$rollback\""
 fi
 
-read -p "> Add meta name: version, release to file '$html_file' and/or press enter."
-
-if [ -f "$html_file" ]; then
+if [ "$html_file" == "" ]; then
+	echo "x Meta updates disabled."
+elif [ -f "$html_file" ]; then
+	read -p "> Add meta name: version, release to file '$html_file' and/or press enter."
 	if [ "$ostype" == 1 ]; then
 		sed -i "" -E "s#(<[Mm][Ee][Tt][Aa][[:space:]]+[Nn][Aa][Mm][Ee][[:space:]]*=[[:space:]]*[\"'][Vv][Ee][Rr][Ss][Ii][Oo][Nn][\"'][[:space:]]+[Cc][Oo][Nn][Tt][Ee][Nn][Tt][[:space:]]*=[[:space:]]*[\"'])[[:print:]]{0,}([\"'][[:space:]]*/?>[[:space:]]*(</[Mm][Ee][Tt][Aa]>)?)#\1$version\2#g;s#(<[Mm][Ee][Tt][Aa][[:space:]]+[Nn][Aa][Mm][Ee][[:space:]]*=[[:space:]]*[\"'][Rr][Ee][Ll][Ee][Aa][Ss][Ee][\"'][[:space:]]+[Cc][Oo][Nn][Tt][Ee][Nn][Tt][[:space:]]*=[[:space:]]*[\"'])[[:print:]]{0,}([\"'][[:space:]]*/?>[[:space:]]*(</[Mm][Ee][Tt][Aa]>)?)#\1$release\2#g" "$html_file"
 	else
 		sed -i "" "s#\(<[Mm][Ee][Tt][Aa]\s\{1,\}[Nn][Aa][Mm][Ee]\s\{0,\}=\s\{0,\}[\"'][Vv][Ee][Rr][Ss][Ii][Oo][Nn][\"']\s\{1,\}[Cc][Oo][Nn][Tt][Ee][Nn][Tt]\s\{0,\}=\s\{0,\}[\"']\)[[:print:]]\{0,\}\([\"']\s\{0,\}/\?>\s\{0,\}\(</[Mm][Ee][Tt][Aa]>\)\?\)#\1$version\2#g;s#\(<[Mm][Ee][Tt][Aa]\s\{1,\}[Nn][Aa][Mm][Ee]\s\{0,\}=\s\{0,\}[\"'][Rr][Ee][Ll][Ee][Aa][Ss][Ee][\"']\s\{1,\}[Cc][Oo][Nn][Tt][Ee][Nn][Tt]\s\{0,\}=\s\{0,\}[\"']\)[[:print:]]\{0,\}\([\"']\s\{0,\}/\?>\s\{0,\}\(</[Mm][Ee][Tt][Aa]>\)\?\)#\1$release\2#g" "$html_file"
 	fi
 	echo "* Meta tags updated."
+	git add $html_file
+	git commit -m "Deployment meta update."
+	echo "* '$html_file' added to Git."
 else
 	echo "x File '$html_file' not found."
 fi
